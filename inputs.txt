@@ -1,0 +1,5 @@
+_address
+_startingPrice: 1000000000000000000
+_reservePrice: 100000000000000000
+_duration: 1200
+_totalTokens: 500000000000000000000000
