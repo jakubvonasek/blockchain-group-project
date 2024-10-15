@@ -6,8 +6,9 @@ import "@openzeppelin/contracts@4.4.0/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts@4.4.0/security/Pausable.sol";
 import "@openzeppelin/contracts@4.4.0/access/Ownable.sol";
 
+
 contract V4Coin is ERC20, ERC20Burnable, Pausable, Ownable {
-    constructor() ERC20("EduCoin", "EDC") {
+    constructor() ERC20("V4Coin", "V4C") {
         _mint(msg.sender, 1000 * 10 ** decimals());
     }
 
