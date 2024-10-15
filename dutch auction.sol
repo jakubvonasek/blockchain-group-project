@@ -3,7 +3,12 @@ pragma solidity ^0.8.2;
 
 // Import necessary OpenZeppelin contracts
 import "@openzeppelin/contracts@4.4.0/security/ReentrancyGuard.sol";
-import "./token.sol";
+import "./v4coin.sol";
+
+// Import Hardhat's console for debugging
+// Note: This import is only available during development with Hardhat.
+// Remove or comment out this line before deploying to production.
+import "hardhat/console.sol";
 
 contract DutchAuction is ReentrancyGuard {
     // Variables
@@ -41,17 +46,37 @@ contract DutchAuction is ReentrancyGuard {
         startAt = block.timestamp;
         endAt = startAt + duration;
         totalTokens = _totalTokens;
+
+        // Console log constructor parameters
+        console.log("DutchAuction initialized with the following parameters:");
+        console.log("Token Address:", _tokenAddress);
+        console.log("Starting Price:", _startingPrice);
+        console.log("Reserve Price:", _reservePrice);
+        console.log("Duration (seconds):", _duration);
+        console.log("Total Tokens:", _totalTokens);
+        console.log("Auction Start Time:", startAt);
+        console.log("Auction End Time:", endAt);
     }
 
     // Function to get current price
     function getCurrentPrice() public view returns (uint256) {
-        if (block.timestamp >= endAt) {
-            return reservePrice;
+        uint256 currentTime = block.timestamp;
+        uint256 currentPrice;
+
+        if (currentTime >= endAt) {
+            currentPrice = reservePrice;
         } else {
-            uint256 elapsed = block.timestamp - startAt;
+            uint256 elapsed = currentTime - startAt;
             uint256 priceDecay = ((startingPrice - reservePrice) * elapsed) / duration;
-            return startingPrice - priceDecay;
+            currentPrice = startingPrice - priceDecay;
         }
+
+        // Console log current price calculation
+        console.log("getCurrentPrice called at time:", currentTime);
+        console.log("Elapsed Time:", currentTime - startAt);
+        console.log("Current Price:", currentPrice);
+
+        return currentPrice;
     }
 
     // Function to place a bid
@@ -66,13 +91,21 @@ contract DutchAuction is ReentrancyGuard {
         tokensSold += tokensToPurchase;
 
         // Transfer tokens to bidder
-        token.transfer(msg.sender, tokensToPurchase);
+        bool success = token.transfer(msg.sender, tokensToPurchase);
+        require(success, "Token transfer failed");
+
+        // Console log bid details
+        console.log("Bid placed by:", msg.sender);
+        console.log("Bid Amount (ETH):", msg.value);
+        console.log("Tokens Purchased:", tokensToPurchase);
+        console.log("Total Tokens Sold:", tokensSold);
 
         emit BidPlaced(msg.sender, msg.value, tokensToPurchase);
 
         // End auction if all tokens sold
         if (tokensSold == totalTokens) {
             auctionEnded = true;
+            console.log("All tokens sold. Auction ended at price:", price);
             emit AuctionEnded(tokensSold, price);
             finalizeAuction();
         }
@@ -84,6 +117,12 @@ contract DutchAuction is ReentrancyGuard {
         require(!auctionEnded, "Auction already ended");
         auctionEnded = true;
         uint256 price = getCurrentPrice();
+
+        // Console log auction ending
+        console.log("Auction manually ended.");
+        console.log("Total Tokens Sold:", tokensSold);
+        console.log("Clearing Price:", price);
+
         emit AuctionEnded(tokensSold, price);
         finalizeAuction();
     }
@@ -91,12 +130,21 @@ contract DutchAuction is ReentrancyGuard {
     // Function to finalize the auction
     function finalizeAuction() internal {
         // Transfer the Ether to the seller
-        seller.transfer(address(this).balance);
+        uint256 contractBalance = address(this).balance;
+        seller.transfer(contractBalance);
+
+        // Console log transfer details
+        console.log("Transferred", contractBalance, "wei to seller:", seller);
 
         // Burn unsold tokens
         uint256 unsoldTokens = totalTokens - tokensSold;
         if (unsoldTokens > 0) {
             token.burn(unsoldTokens);
+
+            // Console log token burn
+            console.log("Burned unsold tokens:", unsoldTokens);
+        } else {
+            console.log("No unsold tokens to burn.");
         }
     }
 }
