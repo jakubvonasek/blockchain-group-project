@@ -60,6 +60,7 @@ contract DutchAuction is ReentrancyGuard {
 
     // Function to get current price
     function getCurrentPrice() public view returns (uint256) {
+        console.log("current price function called");
         uint256 currentTime = block.timestamp;
         uint256 currentPrice;
 
@@ -81,18 +82,28 @@ contract DutchAuction is ReentrancyGuard {
 
     // Function to place a bid
     function bid() public payable nonReentrant {
+        console.log("bid function called");
         require(block.timestamp >= startAt && block.timestamp <= endAt, "Auction not active");
+        console.log("auction active");
         require(!auctionEnded, "Auction has ended");
+        console.log("auction has not ended yet");
         uint256 price = getCurrentPrice();
-        uint256 tokensToPurchase = (msg.value * (10 ** 18)) / price; // Adjust for decimals
+        console.log("LOG - msg value: ",msg.value);
+        console.log("LOG - current price: ",price);
+        uint256 tokensToPurchase = ((msg.value) / price); // Adjust for decimals
+        console.log("LOG - ",tokensSold + tokensToPurchase, "<=",totalTokens);
         require(tokensSold + tokensToPurchase <= totalTokens, "Not enough tokens left");
+        console.log("enough tokens");
 
         bids[msg.sender] += msg.value;
         tokensSold += tokensToPurchase;
 
         // Transfer tokens to bidder
+        console.log("LOG - transfering",tokensToPurchase,"tokens to bidder");
         bool success = token.transfer(msg.sender, tokensToPurchase);
+        console.log("LOG success check: ", success);
         require(success, "Token transfer failed");
+        console.log("token transfer success");
 
         // Console log bid details
         console.log("Bid placed by:", msg.sender);
