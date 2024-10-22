@@ -1,6 +1,5 @@
-const contractAddress = '0xf8e81D47203A594245E36C48e151709F0C19fBe8'; // Replace with your contract address
+const contractAddress = '0x1D13C7f6eb7F672c63cCF46E1CC32Ab7aFD7a320'; // Replace with your contract address
 const abi = [
-  [
     {
       "anonymous": false,
       "inputs": [
@@ -252,11 +251,19 @@ const abi = [
       "stateMutability": "view",
       "type": "function"
     }
-  ]
 ]; // Replace with the contract ABI
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-let contract;
+
+// const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+
+const web3 = new Web3(Web3.givenProvider);
+const contract = new web3.eth.Contract(abi,contractAddress);
+
+
+console.log("hovno");
+// let contract;
 let priceHistory = [];
+
 
 async function initializeContract() {
   const signer = provider.getSigner();
