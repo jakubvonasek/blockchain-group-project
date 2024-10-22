@@ -269,6 +269,7 @@ async function initializeContract() {
 
   await updateAuctionDetails();
   setInterval(updateAuctionDetails, 10000); // Update every 10 seconds
+  console.log("LOG - contract initalized");
 }
 
 async function updateAuctionDetails() {
@@ -284,6 +285,7 @@ async function updateAuctionDetails() {
 
   priceHistory.push(ethers.utils.formatEther(currentPrice));
   updatePriceChart();
+  console.log("LOG - auction details updated");
 }
 
 function updateTimeRemaining(endAt) {
@@ -292,6 +294,7 @@ function updateTimeRemaining(endAt) {
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
   document.getElementById('timeRemaining').innerText = `${minutes}m ${seconds}s`;
+  console.log("LOG - time remaining updated");
 }
 
 async function placeBid() {
@@ -301,6 +304,7 @@ async function placeBid() {
     to: contractAddress,
     value: ethers.utils.parseEther(bidAmount)
   });
+  console.log("LOG - bid placed")
 }
 
 function updateBidsList(bidder, amount, tokens) {
@@ -308,6 +312,7 @@ function updateBidsList(bidder, amount, tokens) {
   const listItem = document.createElement('li');
   listItem.innerText = `Bidder: ${bidder}, Amount: ${ethers.utils.formatEther(amount)} ETH, Tokens: ${tokens}`;
   bidsList.appendChild(listItem);
+  console.log("LOG - bid list updated")
 }
 
 function updatePriceChart() {
@@ -330,6 +335,7 @@ function updatePriceChart() {
       }
     }
   });
+  console.log("LOG - price chart updated")
 }
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
