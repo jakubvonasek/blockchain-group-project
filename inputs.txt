@@ -7,3 +7,9 @@ _totalTokens: 500000000000000000000000
 
 input string:
 _,1000,100,1200,500
+
+
+1. compile coin and auction files
+2. deploy the coin
+3. transfer coins from owner to the auction
+4. happy auctioning!
