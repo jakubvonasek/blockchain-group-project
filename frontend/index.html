@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dutch Auction</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.js" type="application/javascript">
+  </script>  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" defer></script>
+  <script src="script.js" defer></script>
+
+</head>
+<body>
+  <div class="container">
+    <h1>Dutch Auction</h1>
+    <div class="info">
+      <p>Current Price: <span id="currentPrice">Loading...</span> ETH</p>
+      <p>Total Tokens: <span id="totalTokens">Loading...</span></p>
+      <p>Tokens Sold: <span id="tokensSold">Loading...</span></p>
+      <p>Time Remaining: <span id="timeRemaining">Loading...</span></p>
+      <p>Debug variable: <span id="debugVariable">Loading...</span></p>
+
+    </div>
+
+    <canvas id="priceChart" width="400" height="200"></canvas>
+
+    <div class="bid-section">
+      <h2>Place a Bid</h2>
+      <input type="number" id="bidAmount" placeholder="Enter ETH amount" />
+      <input type="text" id="bidAccount" placeholder="Enter your account ID" />
+      <button id="placeBid">Place Bid</button>
+    </div>
+
+    <h2>Bids</h2>
+    <ul id="bidsList">Loading...</ul>
+  </div>
+
+</body>
+</html>
