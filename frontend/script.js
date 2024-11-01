@@ -1,5 +1,5 @@
-const auctionAddress = '0x7C1eF45321933E5bAF85eFc4CBE675757c87737b'; // Replace with your contract address
-const coinAddress = '0x5Bde962E250Cc6DdfA4ef56295eD811Bdc338cCE'
+const auctionAddress = '0x27c7A8bB82ae03B8CB131c9433d97d1e350c1AA4'; // Replace with your contract address
+const coinAddress = '0x6aB86035c9A51CFd3CBcC7D5b629F4bF0002B660'
 
 const auctionAbi = [
     {
@@ -723,6 +723,8 @@ initializeCoinContract();
 async function initializeContract() {
   const signer = provider.getSigner();
   contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
+  coinContract.transfer(auctionAddress, 500);
+  console.log("LOG - coin transfered to auction contract");
   // Initialize event listeners
   contract.on('BidPlaced', (signer, amount, tokens) => {
     updateBidsList(signer, amount, tokens);
@@ -730,7 +732,6 @@ async function initializeContract() {
   
   await updateAuctionDetails();
   setInterval(updateAuctionDetails, 10000); // Update every 10 seconds
-  coinContract.transfer(auctionAddress, 500);
   console.log("LOG - contract initalized");
 }
 
@@ -836,7 +837,7 @@ async function placeBid() {
 
     const tx = await contractWithSigner.bid({
       value: bidAmount,
-      gasLimit: ethers.utils.hexlify(100000) // Set a manual gas limit
+    //   gasLimit: ethers.utils.hexlify(400000) // Set a manual gas limit
     });
       
     console.log("LOG - Transaction successful, tx:", tx);
