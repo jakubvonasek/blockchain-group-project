@@ -1,5 +1,5 @@
-const auctionAddress = '0x042c5fd1a31643644Ac16b800151c329dbB358F3'; // Replace with your contract address
-const coinAddress = '0xe704225236058741Dab81ab4713b4bDA5De965a8'
+const auctionAddress = '0x0d13AFd00e815A0148f0fe400B337133aec809Ef'; // Replace with your contract address
+const coinAddress = '0x845e5f2624c83CC7E1AB302DEDD9C69D082113bb'
 
 const auctionAbi = [
 	{
@@ -901,6 +901,16 @@ async function updateAuctionDetails() {
   
 	updatePriceChart();
 
+	priceHistory.push(ethers.utils.formatEther(currentPrice));
+	timestampHistory.push(new Date().toLocaleTimeString());
+  
+	// Save to localStorage
+	localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
+	localStorage.setItem('timestampHistory', JSON.stringify(timestampHistory));
+  
+	updatePriceChart();
+	console.log("LOG - auction details updated");
+
 	console.log("LOG - auction details updated");
   }
 
@@ -1021,7 +1031,7 @@ function updatePriceChart() {
 	new Chart(ctx, {
 	  type: 'line',
 	  data: {
-		labels: timestampHistory, // Use timestampHistory for x-axis labels
+		labels: timestampHistory,
 		datasets: [{
 		  label: 'Price Over Time',
 		  data: priceHistory,
@@ -1033,9 +1043,9 @@ function updatePriceChart() {
 		scales: {
 		  x: {
 			title: { display: true, text: 'Time' },
-			ticks: { autoSkip: true, maxTicksLimit: 10 } // Adjust to limit the number of displayed timestamps
+			ticks: { autoSkip: true, maxTicksLimit: 10 }
 		  },
-		  y: { title: { display: true, text: 'Price (Wei))' } }
+		  y: { title: { display: true, text: 'Price (Wei)' } }
 		}
 	  }
 	});
@@ -1043,3 +1053,21 @@ function updatePriceChart() {
   }
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
+window.addEventListener('load', () => {
+	// Load saved data from localStorage
+	const savedPriceHistory = localStorage.getItem('priceHistory');
+	const savedTimestampHistory = localStorage.getItem('timestampHistory');
+  
+	if (savedPriceHistory && savedTimestampHistory) {
+	  priceHistory = JSON.parse(savedPriceHistory);
+	  timestampHistory = JSON.parse(savedTimestampHistory);
+	} else {
+	  // Initialize with empty arrays if no data is saved
+	  priceHistory = [];
+	  timestampHistory = [];
+	}
+  
+	// Initialize contract and start regular updates
+	initializeContract();
+	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+  });
