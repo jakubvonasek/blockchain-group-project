@@ -1,5 +1,5 @@
-const auctionAddress = '0x79ae7CB4cd329E23F88A255AE3069B63e726D042'; // Replace with your contract address
-const coinAddress = '0xD9490404faCa063084b44c0d632934aE57776b89'
+const auctionAddress = '0x702357160824ceb261093b877408E45Dcd5AA7ae'; // Replace with your contract address
+const coinAddress = '0x92e9f71591Db800D63F1C615f2E80B00640d2FdB'
 
 const auctionAbi = [
 	{
@@ -872,11 +872,27 @@ async function chooseAccountByIndex(index) {
 
 async function updateAuctionDetails() {
     auctionEnded = await contract.auctionEnded();
+    const currentTime = Math.floor(Date.now() / 1000);
+    const endAt = await contract.endAt();
+	const tmp = contract.tokensSold();
 
-    if (auctionEnded) {
-        // Clear the update interval when auction ends
+
+    // Stop updates if the auction has ended or the end time has passed
+    if (auctionEnded || currentTime >= endAt) {
+        try {
+            // Call the endAuction function from your smart contract if not already ended
+            if (!auctionEnded) {
+                await contract.endAuction();
+                console.log("LOG - endAuction called successfully due to timer expiration");
+            }
+        } catch (error) {
+            console.error("ERROR - Failed to call endAuction:", error);
+        }
+
         clearInterval(updateInterval); // Stop the interval
         document.getElementById('timeRemaining').innerText = "Auction Ended";
+		document.getElementById('tokensSold').innerText = tmp;
+
         console.log("LOG - Auction ended, updates stopped.");
         return; // Exit the function to prevent further updates
     }
@@ -886,7 +902,6 @@ async function updateAuctionDetails() {
     const currentPrice = getCurrentPrice();
     const totalTokens = await contract.totalTokens();
     const tokensSold = await contract.tokensSold();
-    const endAt = await contract.endAt();
 
     const coinDbg = await coinContract.balanceOf(auctionAddress);
     console.log("LOG - coin current price:", currentPrice.toString());
@@ -894,7 +909,6 @@ async function updateAuctionDetails() {
     document.getElementById('currentPrice').innerText = currentPrice.toString();
     document.getElementById('totalTokens').innerText = totalTokens.toString();
     document.getElementById('tokensSold').innerText = tokensSold.toString();
-    // document.getElementById('debugVariable').innerText = coinDbg.toString();
 
     updateTimeRemaining(endAt);
 
@@ -909,6 +923,7 @@ async function updateAuctionDetails() {
     updatePriceChart();
     console.log("LOG - auction details updated before end");
 }
+
   function updateTimeRemaining(endAt) {
 	const currentTime = Math.floor(Date.now() / 1000);
 	const timeRemaining = endAt - currentTime;

@@ -46,31 +46,6 @@ contract DutchAuction is ReentrancyGuard {
         
     }
 
-    // Function to get starting price
-    function getStartingPrice() public view returns (uint256) {
-        return startingPrice;
-    }
-    // Function to get ending price
-    function getReservePrice() public view returns (uint256) {
-        return reservePrice;
-    }
-
-    // Function to get duration of auction
-    function getDuration() public view returns (uint256) {
-        return duration;
-    }
-
-    // Function to get auction details
-    function getEndAt() public view returns (uint256) {
-        return endAt;
-    }
-
-
-    // Function to get start time
-    function getStartTime() public view returns (uint256) {
-        return startAt;
-    }
-
     // Function to get current price
     function getCurrentPrice() public view returns (uint256) {
         uint256 currentTime = block.timestamp;
