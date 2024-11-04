@@ -1,258 +1,323 @@
-const auctionAddress = '0x42adCDB6Bd17379317b2200f53254e1e9cBbC8C2'; // Replace with your contract address
-const coinAddress = '0x5A832faf2c92E9FFcE4De19f33E59D3f394f7794'
+const auctionAddress = '0x042c5fd1a31643644Ac16b800151c329dbB358F3'; // Replace with your contract address
+const coinAddress = '0xe704225236058741Dab81ab4713b4bDA5De965a8'
 
 const auctionAbi = [
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "totalTokensSold",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "clearingPrice",
-          "type": "uint256"
-        }
-      ],
-      "name": "AuctionEnded",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "bidder",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "tokensPurchased",
-          "type": "uint256"
-        }
-      ],
-      "name": "BidPlaced",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "bid",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "endAuction",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_tokenAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_startingPrice",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_reservePrice",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_duration",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_totalTokens",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [],
-      "name": "auctionEnded",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "bids",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "duration",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "endAt",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getCurrentPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "reservePrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "seller",
-      "outputs": [
-        {
-          "internalType": "address payable",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "startAt",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "startingPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "token",
-      "outputs": [
-        {
-          "internalType": "contract V4Coin",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "tokensSold",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalTokens",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_tokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_startingPrice",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_reservePrice",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_duration",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalTokens",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalTokensSold",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "clearingPrice",
+				"type": "uint256"
+			}
+		],
+		"name": "AuctionEnded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "bidder",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokensPurchased",
+				"type": "uint256"
+			}
+		],
+		"name": "BidPlaced",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "auctionEnded",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "bid",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "bids",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "duration",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endAt",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endAuction",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getCurrentPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getDuration",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getEndAt",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getReservePrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getStartTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getStartingPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "reservePrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "seller",
+		"outputs": [
+			{
+				"internalType": "address payable",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startAt",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startingPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "token",
+		"outputs": [
+			{
+				"internalType": "contract V4Coin",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "tokensSold",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalTokens",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ]; // Replace with the contract ABI
 
 const coinAbi = [
@@ -689,6 +754,10 @@ const coinAbi = [
 // const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 let selectedSigner;
+let startTime = 0;
+let startingPrice = 0;
+let reservePrice = 0;
+let duration = 0;
 
 // script.js
 
@@ -722,35 +791,67 @@ async function initializeCoinContract() {
 
 initializeCoinContract();
 
+
 async function initializeContract() {
 	const signer = provider.getSigner();
 	contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
-  
+	
 	if (!eventListenersInitialized) {
-	  // Initialize event listeners only once
-	  contract.on('BidPlaced', (bidder, amount, tokensPurchased, event) => {
-		(async () => {
-		  try {
+		// Initialize event listeners only once
+		contract.on('BidPlaced', (bidder, amount, tokensPurchased, event) => {
+			(async () => {
+				try {
 			// Fetch the block to get the timestamp
 			const block = await provider.getBlock(event.blockNumber);
 			const time = new Date(block.timestamp * 1000).toLocaleString();
-  
+			
 			// Update the bids list with all necessary information
 			updateBidsList(bidder, amount, tokensPurchased, time);
-		  } catch (error) {
+		} catch (error) {
 			console.error("ERROR - Failed to fetch block timestamp:", error);
-		  }
+		}
 		})();
-	  });
-	  eventListenersInitialized = true; // Mark listeners as initialized
+	});
+		eventListenersInitialized = true; // Mark listeners as initialized
 	}
-  
+
+	startTime = await contract.getStartTime();
+	startingPrice = parseInt((await contract.getStartingPrice()).toString());
+	reservePrice = parseInt((await contract.getReservePrice()).toString());
+	
+	console.log("HOVNO 2 - reserve price", reservePrice);
+	duration = parseFloat(await contract.getDuration());
 	await updateAuctionDetails();
 	updateInterval = setInterval(updateAuctionDetails, 10000); // Update every second
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
-  }
+}
 
+function getCurrentPrice() {
+	let currentPrice;
+	let elapsed;
+	let priceDecay;
+	let endAt;
+
+	const currentTime = (Date.now() / 1000).toString();
+	console.log("Current time", currentTime);
+
+	if (currentTime >= parseInt(startTime) + parseInt(duration)) {
+		currentPrice = parseInt(reservePrice);
+	} else {
+		elapsed = currentTime - startTime;
+		priceDecay = ((startingPrice - reservePrice) * elapsed) / duration;
+		currentPrice = Math.ceil(startingPrice - priceDecay);
+	}
+
+	console.log("HOVNOS")
+	console.log("LOG - current time:", currentTime);
+	console.log("LOG - start time:", startTime);
+	console.log("LOG - duration:", duration);
+	console.log("LOG - start + duration:", startTime + duration);
+	
+	return currentPrice;
+}
 
 // Function to choose an account based on index
 async function chooseAccountByIndex(index) {
@@ -778,7 +879,7 @@ async function updateAuctionDetails() {
 	  return;
 	}
   
-	const currentPrice = await contract.getCurrentPrice();
+	const currentPrice = getCurrentPrice();
 	const totalTokens = await contract.totalTokens();
 	const tokensSold = await contract.tokensSold();
 	const endAt = await contract.endAt();
@@ -799,6 +900,7 @@ async function updateAuctionDetails() {
 	timestampHistory.push(new Date().toLocaleTimeString());
   
 	updatePriceChart();
+
 	console.log("LOG - auction details updated");
   }
 
@@ -941,4 +1043,3 @@ function updatePriceChart() {
   }
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
-
