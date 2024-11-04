@@ -1,5 +1,5 @@
-const auctionAddress = '0x7C1eF45321933E5bAF85eFc4CBE675757c87737b'; // Replace with your contract address
-const coinAddress = '0x5Bde962E250Cc6DdfA4ef56295eD811Bdc338cCE'
+const auctionAddress = '0xe8415823bA36B411b273e88F18b8c782b7E50c79'; // Replace with your contract address
+const coinAddress = '0x8f7110A8b636b367bf6bDedA0dD0E33bB42b76b2'
 
 const auctionAbi = [
     {
@@ -709,6 +709,8 @@ console.log("Passed provider");
 let contract;
 let coinContract;
 let priceHistory = [];
+let timestampHistory = [];
+let eventListenersInitialized = false;
 
 
 async function initializeCoinContract() {
@@ -721,18 +723,33 @@ async function initializeCoinContract() {
 initializeCoinContract();
 
 async function initializeContract() {
-  const signer = provider.getSigner();
-  contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
-  // Initialize event listeners
-  contract.on('BidPlaced', (signer, amount, tokens) => {
-    updateBidsList(signer, amount, tokens);
-  });
+	const signer = provider.getSigner();
+	contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
   
-  await updateAuctionDetails();
-  setInterval(updateAuctionDetails, 10000); // Update every 10 seconds
-  coinContract.transfer(auctionAddress, 500);
-  console.log("LOG - contract initalized");
-}
+	if (!eventListenersInitialized) {
+	  // Initialize event listeners only once
+	  contract.on('BidPlaced', (bidder, amount, tokensPurchased, event) => {
+		(async () => {
+		  try {
+			// Fetch the block to get the timestamp
+			const block = await provider.getBlock(event.blockNumber);
+			const time = new Date(block.timestamp * 1000).toLocaleString();
+  
+			// Update the bids list with all necessary information
+			updateBidsList(bidder, amount, tokensPurchased, time);
+		  } catch (error) {
+			console.error("ERROR - Failed to fetch block timestamp:", error);
+		  }
+		})();
+	  });
+	  eventListenersInitialized = true; // Mark listeners as initialized
+	}
+  
+	await updateAuctionDetails();
+	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+	coinContract.transfer(auctionAddress, 500);
+	console.log("LOG - contract initialized");
+  }
 
 
 // Function to choose an account based on index
@@ -752,40 +769,58 @@ async function chooseAccountByIndex(index) {
 }
 
 async function updateAuctionDetails() {
-  const currentPrice = await contract.getCurrentPrice();
-  const totalTokens = await contract.totalTokens();
-  const tokensSold = await contract.tokensSold();
-  const endAt = await contract.endAt();
-
-  const auctionEnded = await contract.auctionEnded();
-  console.log("LOG - Auction ended:",auctionEnded);
-
-  const coinOwnerAddress = await coinContract.owner();
+	const auctionEnded = await contract.auctionEnded();
+	console.log("LOG - Auction ended:", auctionEnded);
   
-
-  const coinDbg = await coinContract.balanceOf(auctionAddress);
-
-  document.getElementById('currentPrice').innerText = ethers.utils.formatEther(currentPrice);
-  document.getElementById('totalTokens').innerText = totalTokens.toString();
-  document.getElementById('tokensSold').innerText = tokensSold.toString();
+	if (auctionEnded) {
+	  document.getElementById('timeRemaining').innerText = "Auction Ended";
+	  clearInterval(updateInterval); // Stop the interval updating the auction details
+	  return;
+	}
   
-  document.getElementById('debugVariable').innerText = coinDbg.toString();
+	const currentPrice = await contract.getCurrentPrice();
+	const totalTokens = await contract.totalTokens();
+	const tokensSold = await contract.tokensSold();
+	const endAt = await contract.endAt();
+	
+	const coinDbg = await coinContract.balanceOf(auctionAddress);
   
-  updateTimeRemaining(endAt);
+	document.getElementById('currentPrice').innerText = currentPrice.toString();
+	document.getElementById('totalTokens').innerText = totalTokens.toString();
+	document.getElementById('tokensSold').innerText = tokensSold.toString();
+	document.getElementById('debugVariable').innerText = coinDbg.toString();
   
-  priceHistory.push(ethers.utils.formatEther(currentPrice));
-  updatePriceChart();
-  console.log("LOG - auction details updated");
-}
+	updateTimeRemaining(endAt);
+  
+	// Store current price and timestamp
+	priceHistory.push(ethers.utils.formatEther(currentPrice));
+	timestampHistory.push(new Date().toLocaleTimeString());
+  
+	updatePriceChart();
+	console.log("LOG - auction details updated");
+  }
 
-function updateTimeRemaining(endAt) {
-  const currentTime = Math.floor(Date.now() / 1000);
-  const timeRemaining = endAt - currentTime;
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
-  document.getElementById('timeRemaining').innerText = `${minutes}m ${seconds}s`;
-  console.log("LOG - time remaining updated");
-}
+  function updateTimeRemaining(endAt) {
+	const currentTime = Math.floor(Date.now() / 1000);
+	const timeRemaining = endAt - currentTime;
+  
+	if (timeRemaining <= 0) {
+	  document.getElementById('timeRemaining').innerText = "Auction Ended";
+	  return; // Exit the function if auction is ended
+	}
+  
+	const minutes = Math.floor(timeRemaining / 60);
+	const seconds = timeRemaining % 60;
+	document.getElementById('timeRemaining').innerText = `${minutes}m ${seconds}s`;
+	console.log("LOG - time remaining updated");
+  }
+  
+  // Modify the interval to store it in a variable so it can be cleared
+  let updateInterval;
+  window.addEventListener('load', () => {
+	initializeContract();
+	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+  });
 
 async function getIndexByAddress(address) {
   try {
@@ -836,7 +871,7 @@ async function placeBid() {
 
     const tx = await contractWithSigner.bid({
       value: bidAmount,
-      gasLimit: ethers.utils.hexlify(100000) // Set a manual gas limit
+      //gasLimit: ethers.utils.hexlify(100000) // Set a manual gas limit
     });
       
     console.log("LOG - Transaction successful, tx:", tx);
@@ -845,36 +880,63 @@ async function placeBid() {
   }
 }
 
-function updateBidsList(signer, amount, tokens) {
-  const bidsList = document.getElementById('bidsList');
-  const listItem = document.createElement('li');
-  listItem.innerText = `Bidder: ${signer}, Amount: ${ethers.utils.formatEther(amount)} ETH, Tokens: ${tokens}`;
-  bidsList.appendChild(listItem);
-  console.log("LOG - bid list updated")
-}
+function updateBidsList(bidder, amount, tokensPurchased, time) {
+	const bidsList = document.getElementById('bidsList');
+  
+	// Create a new table row
+	const row = document.createElement('tr');
+  
+	// Create and append the Account ID cell
+	const accountCell = document.createElement('td');
+	accountCell.textContent = bidder;
+	row.appendChild(accountCell);
+  
+	// Create and append the Bid Amount cell
+	const amountCell = document.createElement('td');
+	amountCell.textContent = amount.toString();
+	row.appendChild(amountCell);
+  
+	// Create and append the Tokens Purchased cell
+	const tokensCell = document.createElement('td');
+	tokensCell.textContent = tokensPurchased.toString();
+	row.appendChild(tokensCell);
+  
+	// Create and append the Time cell
+	const timeCell = document.createElement('td');
+	timeCell.textContent = time;
+	row.appendChild(timeCell);
+  
+	// Append the row to the table body
+	bidsList.appendChild(row);
+  
+	console.log("LOG - bid list updated");
+  }
 
 function updatePriceChart() {
-  const ctx = document.getElementById('priceChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: Array(priceHistory.length).fill('').map((_, i) => i + 1),
-      datasets: [{
-        label: 'Price Over Time',
-        data: priceHistory,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        fill: false
-      }]
-    },
-    options: {
-      scales: {
-        x: { title: { display: true, text: 'Time (Updates)' } },
-        y: { title: { display: true, text: 'Price (ETH)' } }
-      }
-    }
-  });
-  console.log("LOG - price chart updated")
-}
+	const ctx = document.getElementById('priceChart').getContext('2d');
+	new Chart(ctx, {
+	  type: 'line',
+	  data: {
+		labels: timestampHistory, // Use timestampHistory for x-axis labels
+		datasets: [{
+		  label: 'Price Over Time',
+		  data: priceHistory,
+		  borderColor: 'rgba(75, 192, 192, 1)',
+		  fill: false
+		}]
+	  },
+	  options: {
+		scales: {
+		  x: {
+			title: { display: true, text: 'Time' },
+			ticks: { autoSkip: true, maxTicksLimit: 10 } // Adjust to limit the number of displayed timestamps
+		  },
+		  y: { title: { display: true, text: 'Price (Wei))' } }
+		}
+	  }
+	});
+	console.log("LOG - price chart updated");
+  }
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
 window.addEventListener('load', initializeContract);
