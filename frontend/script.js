@@ -1,5 +1,5 @@
-const auctionAddress = '0x17394cD4160fC3049da6cC7c378c0D12b369fFfA'; // Replace with your contract address
-const coinAddress = '0x0B83eF5C7A46b7D57efc28CC6a7bd1e880a04159'
+const auctionAddress = '0x79ae7CB4cd329E23F88A255AE3069B63e726D042'; // Replace with your contract address
+const coinAddress = '0xD9490404faCa063084b44c0d632934aE57776b89'
 
 const auctionAbi = [
 	{
@@ -821,13 +821,8 @@ async function initializeContract() {
 	startTime = await contract.getStartTime();
 	startingPrice = parseInt((await contract.getStartingPrice()).toString());
 	reservePrice = parseInt((await contract.getReservePrice()).toString());
-	
-	console.log("HOVNO 2 - reserve price", reservePrice);
 	duration = parseFloat(await contract.getDuration());
 	await updateAuctionDetails();
-	if(auctionEnded){
-		return;
-	}
 	updateInterval = setInterval(updateAuctionDetails, 10000); // Update every second
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
@@ -876,58 +871,51 @@ async function chooseAccountByIndex(index) {
 }
 
 async function updateAuctionDetails() {
-	auctionEnded = await contract.auctionEnded();
-	if(auctionEnded){
-		clearInterval(updateInterval);
-	}
+    auctionEnded = await contract.auctionEnded();
 
-	console.log("LOG - Auction ended:", auctionEnded);
-  
-	const currentPrice = getCurrentPrice();
-	const totalTokens = await contract.totalTokens();
-	const tokensSold = await contract.tokensSold();
-	const endAt = await contract.endAt();
-	
-	const coinDbg = await coinContract.balanceOf(auctionAddress);
-	console.log("LOG - coin current price:", currentPrice.toString());
-	
-  
-	document.getElementById('currentPrice').innerText = currentPrice.toString();
-	document.getElementById('totalTokens').innerText = totalTokens.toString();
-	document.getElementById('tokensSold').innerText = tokensSold.toString();
-	//document.getElementById('debugVariable').innerText = coinDbg.toString();
-  
-	updateTimeRemaining(endAt);
-  
-	// Store current price and timestamp
-	priceHistory.push(ethers.utils.formatEther(currentPrice));
-	timestampHistory.push(new Date().toLocaleTimeString());
-  
-	updatePriceChart();
+    if (auctionEnded) {
+        // Clear the update interval when auction ends
+        clearInterval(updateInterval); // Stop the interval
+        document.getElementById('timeRemaining').innerText = "Auction Ended";
+        console.log("LOG - Auction ended, updates stopped.");
+        return; // Exit the function to prevent further updates
+    }
 
-	priceHistory.push(ethers.utils.formatEther(currentPrice));
-	timestampHistory.push(new Date().toLocaleTimeString());
-  
-	// Save to localStorage
-	localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
-	localStorage.setItem('timestampHistory', JSON.stringify(timestampHistory));
-  
-	updatePriceChart();
-	console.log("LOG - auction details updated before end");
+    console.log("LOG - Auction ended:", auctionEnded);
 
-	if (auctionEnded) {
-		document.getElementById('timeRemaining').innerText = "Auction Ended";
-		clearInterval(updateInterval); // Stop the interval updating the auction details
-	  }
-	console.log("LOG - auction details updated after end");
-  }
+    const currentPrice = getCurrentPrice();
+    const totalTokens = await contract.totalTokens();
+    const tokensSold = await contract.tokensSold();
+    const endAt = await contract.endAt();
 
+    const coinDbg = await coinContract.balanceOf(auctionAddress);
+    console.log("LOG - coin current price:", currentPrice.toString());
+
+    document.getElementById('currentPrice').innerText = currentPrice.toString();
+    document.getElementById('totalTokens').innerText = totalTokens.toString();
+    document.getElementById('tokensSold').innerText = tokensSold.toString();
+    // document.getElementById('debugVariable').innerText = coinDbg.toString();
+
+    updateTimeRemaining(endAt);
+
+    // Store current price and timestamp
+    priceHistory.push(ethers.utils.formatEther(currentPrice));
+    timestampHistory.push(new Date().toLocaleTimeString());
+
+    // Save to localStorage
+    localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
+    localStorage.setItem('timestampHistory', JSON.stringify(timestampHistory));
+
+    updatePriceChart();
+    console.log("LOG - auction details updated before end");
+}
   function updateTimeRemaining(endAt) {
 	const currentTime = Math.floor(Date.now() / 1000);
 	const timeRemaining = endAt - currentTime;
   
 	if (timeRemaining <= 0) {
 	  document.getElementById('timeRemaining').innerText = "Auction Ended";
+	  document.getElementById('tokensSold').innerText = contract.tokensSold();
 	  return; // Exit the function if auction is ended
 	}
   
@@ -1059,23 +1047,21 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
 
+// This function sets the interval to update the auction details every second
 window.addEventListener('load', () => {
-  // Load saved data from localStorage
-  const savedPriceHistory = localStorage.getItem('priceHistory');
-  const savedTimestampHistory = localStorage.getItem('timestampHistory');
+    // Load saved data from localStorage
+    const savedPriceHistory = localStorage.getItem('priceHistory');
+    const savedTimestampHistory = localStorage.getItem('timestampHistory');
 
-  if (savedPriceHistory && savedTimestampHistory) {
-    priceHistory = JSON.parse(savedPriceHistory);
-    timestampHistory = JSON.parse(savedTimestampHistory);
-  } else {
-    // Initialize with empty arrays if no data is saved
-    priceHistory = [];
-    timestampHistory = [];
-  }
+    if (savedPriceHistory && savedTimestampHistory) {
+        priceHistory = JSON.parse(savedPriceHistory);
+        timestampHistory = JSON.parse(savedTimestampHistory);
+    } else {
+        // Initialize with empty arrays if no data is saved
+        priceHistory = [];
+        timestampHistory = [];
+    }
 
-  // Initialize contract and start regular updates
-  if(!auctionEnded){
-	initializeContract();
-  	updateInterval = setInterval(updateAuctionDetails, 1000);
-  }
+    initializeContract();
+    updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
 });
