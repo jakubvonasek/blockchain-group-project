@@ -1,5 +1,5 @@
-const auctionAddress = '0xe8415823bA36B411b273e88F18b8c782b7E50c79'; // Replace with your contract address
-const coinAddress = '0x8f7110A8b636b367bf6bDedA0dD0E33bB42b76b2'
+const auctionAddress = '0x42adCDB6Bd17379317b2200f53254e1e9cBbC8C2'; // Replace with your contract address
+const coinAddress = '0x5A832faf2c92E9FFcE4De19f33E59D3f394f7794'
 
 const auctionAbi = [
     {
@@ -746,7 +746,7 @@ async function initializeContract() {
 	}
   
 	await updateAuctionDetails();
-	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+	updateInterval = setInterval(updateAuctionDetails, 10000); // Update every second
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
   }
@@ -784,11 +784,13 @@ async function updateAuctionDetails() {
 	const endAt = await contract.endAt();
 	
 	const coinDbg = await coinContract.balanceOf(auctionAddress);
+	console.log("LOG - coin current price:", currentPrice.toString());
+	
   
 	document.getElementById('currentPrice').innerText = currentPrice.toString();
 	document.getElementById('totalTokens').innerText = totalTokens.toString();
 	document.getElementById('tokensSold').innerText = tokensSold.toString();
-	document.getElementById('debugVariable').innerText = coinDbg.toString();
+	//document.getElementById('debugVariable').innerText = coinDbg.toString();
   
 	updateTimeRemaining(endAt);
   
@@ -939,5 +941,4 @@ function updatePriceChart() {
   }
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
-window.addEventListener('load', initializeContract);
 
