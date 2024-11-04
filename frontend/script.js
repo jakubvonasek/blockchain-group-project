@@ -1,5 +1,5 @@
-const auctionAddress = '0xe72e7C8Fb084b33A5473EbeC67838a56e55e6E24'; // Replace with your contract address
-const coinAddress = '0x2AEA2E47950026afaBd69F68BE5F8A771D4aaBD3'
+const auctionAddress = '0x17394cD4160fC3049da6cC7c378c0D12b369fFfA'; // Replace with your contract address
+const coinAddress = '0x0B83eF5C7A46b7D57efc28CC6a7bd1e880a04159'
 
 const auctionAbi = [
 	{
@@ -780,6 +780,8 @@ let coinContract;
 let priceHistory = [];
 let timestampHistory = [];
 let eventListenersInitialized = false;
+let auctionEnded = false;
+let updateInterval;
 
 
 async function initializeCoinContract() {
@@ -795,26 +797,27 @@ initializeCoinContract();
 async function initializeContract() {
 	const signer = provider.getSigner();
 	contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
+	auctionEnded = await contract.auctionEnded();
 	
 	if (!eventListenersInitialized) {
 		// Initialize event listeners only once
 		contract.on('BidPlaced', (bidder, amount, tokensPurchased, event) => {
 			(async () => {
 				try {
-			// Fetch the block to get the timestamp
-			const block = await provider.getBlock(event.blockNumber);
-			const time = new Date(block.timestamp * 1000).toLocaleString();
-			
-			// Update the bids list with all necessary information
-			updateBidsList(bidder, amount, tokensPurchased, time);
-		} catch (error) {
-			console.error("ERROR - Failed to fetch block timestamp:", error);
-		}
-		})();
-	});
+					// Fetch the block to get the timestamp
+					const block = await provider.getBlock(event.blockNumber);
+					const time = new Date(block.timestamp * 1000).toLocaleString();
+					
+					// Update the bids list with all necessary information
+					updateBidsList(bidder, amount, tokensPurchased, time);
+				} catch (error) {
+					console.error("ERROR - Failed to fetch block timestamp:", error);
+				}
+			})();
+		});
 		eventListenersInitialized = true; // Mark listeners as initialized
 	}
-
+	
 	startTime = await contract.getStartTime();
 	startingPrice = parseInt((await contract.getStartingPrice()).toString());
 	reservePrice = parseInt((await contract.getReservePrice()).toString());
@@ -822,6 +825,9 @@ async function initializeContract() {
 	console.log("HOVNO 2 - reserve price", reservePrice);
 	duration = parseFloat(await contract.getDuration());
 	await updateAuctionDetails();
+	if(auctionEnded){
+		return;
+	}
 	updateInterval = setInterval(updateAuctionDetails, 10000); // Update every second
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
@@ -870,14 +876,12 @@ async function chooseAccountByIndex(index) {
 }
 
 async function updateAuctionDetails() {
-	const auctionEnded = await contract.auctionEnded();
-	console.log("LOG - Auction ended:", auctionEnded);
-  
-	if (auctionEnded) {
-	  document.getElementById('timeRemaining').innerText = "Auction Ended";
-	  clearInterval(updateInterval); // Stop the interval updating the auction details
-	  return;
+	auctionEnded = await contract.auctionEnded();
+	if(auctionEnded){
+		clearInterval(updateInterval);
 	}
+
+	console.log("LOG - Auction ended:", auctionEnded);
   
 	const currentPrice = getCurrentPrice();
 	const totalTokens = await contract.totalTokens();
@@ -909,9 +913,13 @@ async function updateAuctionDetails() {
 	localStorage.setItem('timestampHistory', JSON.stringify(timestampHistory));
   
 	updatePriceChart();
-	console.log("LOG - auction details updated");
+	console.log("LOG - auction details updated before end");
 
-	console.log("LOG - auction details updated");
+	if (auctionEnded) {
+		document.getElementById('timeRemaining').innerText = "Auction Ended";
+		clearInterval(updateInterval); // Stop the interval updating the auction details
+	  }
+	console.log("LOG - auction details updated after end");
   }
 
   function updateTimeRemaining(endAt) {
@@ -930,11 +938,8 @@ async function updateAuctionDetails() {
   }
   
   // Modify the interval to store it in a variable so it can be cleared
-  let updateInterval;
-  window.addEventListener('load', () => {
-	initializeContract();
-	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
-  });
+  //let updateInterval;
+
 
 async function getIndexByAddress(address) {
   try {
@@ -1069,6 +1074,8 @@ window.addEventListener('load', () => {
   }
 
   // Initialize contract and start regular updates
-  initializeContract();
-  updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+  if(!auctionEnded){
+	initializeContract();
+  	updateInterval = setInterval(updateAuctionDetails, 1000);
+  }
 });
