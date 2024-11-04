@@ -1,5 +1,5 @@
-const auctionAddress = '0x0d13AFd00e815A0148f0fe400B337133aec809Ef'; // Replace with your contract address
-const coinAddress = '0x845e5f2624c83CC7E1AB302DEDD9C69D082113bb'
+const auctionAddress = '0xe72e7C8Fb084b33A5473EbeC67838a56e55e6E24'; // Replace with your contract address
+const coinAddress = '0x2AEA2E47950026afaBd69F68BE5F8A771D4aaBD3'
 
 const auctionAbi = [
 	{
@@ -1026,48 +1026,49 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
 	console.log("LOG - bid list updated");
   }
 
-function updatePriceChart() {
-	const ctx = document.getElementById('priceChart').getContext('2d');
-	new Chart(ctx, {
-	  type: 'line',
-	  data: {
-		labels: timestampHistory,
-		datasets: [{
-		  label: 'Price Over Time',
-		  data: priceHistory,
-		  borderColor: 'rgba(75, 192, 192, 1)',
-		  fill: false
-		}]
-	  },
-	  options: {
-		scales: {
-		  x: {
-			title: { display: true, text: 'Time' },
-			ticks: { autoSkip: true, maxTicksLimit: 10 }
-		  },
-		  y: { title: { display: true, text: 'Price (Wei)' } }
-		}
-	  }
-	});
-	console.log("LOG - price chart updated");
-  }
+  function updatePriceChart() {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timestampHistory, // Use timestampHistory for x-axis labels
+        datasets: [{
+          label: 'Price Over Time',
+          data: priceHistory.map(price => price * Math.pow(10, 18)), // Multiply each price by 10^16
+          borderColor: 'rgba(75, 192, 192, 1)',
+          fill: false
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            title: { display: true, text: 'Time' },
+            ticks: { autoSkip: true, maxTicksLimit: 10 } // Adjust to limit the number of displayed timestamps
+          },
+          y: { title: { display: true, text: 'Price (Wei)' } }
+        }
+      }
+    });
+    console.log("LOG - price chart updated");
+}
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
+
 window.addEventListener('load', () => {
-	// Load saved data from localStorage
-	const savedPriceHistory = localStorage.getItem('priceHistory');
-	const savedTimestampHistory = localStorage.getItem('timestampHistory');
-  
-	if (savedPriceHistory && savedTimestampHistory) {
-	  priceHistory = JSON.parse(savedPriceHistory);
-	  timestampHistory = JSON.parse(savedTimestampHistory);
-	} else {
-	  // Initialize with empty arrays if no data is saved
-	  priceHistory = [];
-	  timestampHistory = [];
-	}
-  
-	// Initialize contract and start regular updates
-	initializeContract();
-	updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
-  });
+  // Load saved data from localStorage
+  const savedPriceHistory = localStorage.getItem('priceHistory');
+  const savedTimestampHistory = localStorage.getItem('timestampHistory');
+
+  if (savedPriceHistory && savedTimestampHistory) {
+    priceHistory = JSON.parse(savedPriceHistory);
+    timestampHistory = JSON.parse(savedTimestampHistory);
+  } else {
+    // Initialize with empty arrays if no data is saved
+    priceHistory = [];
+    timestampHistory = [];
+  }
+
+  // Initialize contract and start regular updates
+  initializeContract();
+  updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
+});
