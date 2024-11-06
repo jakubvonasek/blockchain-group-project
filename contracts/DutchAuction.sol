@@ -92,7 +92,6 @@ contract DutchAuction is ReentrancyGuard {
     function bid() public payable nonReentrant {
 
         require(block.timestamp >= startAt && block.timestamp <= endAt, "Auction not active");
-        require(!auctionEnded, "Auction has ended");
         uint256 price = getCurrentPrice();
         uint256 tokensToPurchase = ((msg.value) / price); // Adjust for decimals
         require(tokensSold + tokensToPurchase <= totalTokens, "Not enough tokens left");
@@ -110,7 +109,6 @@ contract DutchAuction is ReentrancyGuard {
 
         // End auction if all tokens sold
         if (tokensSold == totalTokens) {
-            auctionEnded = true;
             emit AuctionEnded(tokensSold, price);
             finalizeAuction();
         }
@@ -118,14 +116,7 @@ contract DutchAuction is ReentrancyGuard {
 
     // Function to end the auction manually after duration
     function endAuction() public nonReentrant {
-        require(block.timestamp >= endAt, "Auction duration not yet passed");
-        require(!auctionEnded, "Auction already ended");
-        auctionEnded = true;
-        uint256 price = getCurrentPrice();
-
-
-
-        emit AuctionEnded(tokensSold, price);
+        emit debugBurn(1337);
         finalizeAuction();
     }
 

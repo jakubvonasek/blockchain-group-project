@@ -1,5 +1,5 @@
-const auctionAddress = '0xab280f1888634ad530c2D0a860A129e4C349a065'; // Replace with your contract address
-const coinAddress = '0xC325bAd12cE218F97099B0a72cE030174229ED3b';
+const auctionAddress = '0x8fCa4876a216F537e1e5303692978498909D7EaF'; 
+const coinAddress = '0x663Ba421bcd5F485c4C0C74808D126AF61850031';
 
 const auctionAbi = [
 	{
@@ -344,7 +344,7 @@ const auctionAbi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-]; // Replace with the contract ABI
+]; 
 
 const coinAbi = [
 	{
@@ -777,7 +777,6 @@ const coinAbi = [
 		"type": "function"
 	}
 ]
-// const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 let selectedSigner;
 let startTime = 0;
@@ -785,16 +784,13 @@ let startingPrice = 0;
 let reservePrice = 0;
 let duration = 0;
 
-// script.js
 
-// Check if ethers.js is loaded
 if (typeof ethers !== 'undefined') {
   console.log('ethers.js is loaded successfully');
 } else {
   console.error('ethers.js is not loaded');
 }
 
-// Your existing code here
 
 
 const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7545');
@@ -807,6 +803,7 @@ let priceHistory = [];
 let timestampHistory = [];
 let eventListenersInitialized = false;
 let auctionEnded = false;
+let endAuctionCalled = false; // Add a flag to ensure endAuction is called only once
 let updateInterval;
 
 
@@ -823,18 +820,14 @@ initializeCoinContract();
 async function initializeContract() {
 	const signer = provider.getSigner();
 	contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
-	auctionEnded = await contract.getAuctionEnded();
 	
 	if (!eventListenersInitialized) {
-		// Initialize event listeners only once
 		contract.on('BidPlaced', (bidder, amount, tokensPurchased, event) => {
 			(async () => {
 				try {
-					// Fetch the block to get the timestamp
 					const block = await provider.getBlock(event.blockNumber);
 					const time = new Date(block.timestamp * 1000).toLocaleString();
 					
-					// Update the bids list with all necessary information
 					updateBidsList(bidder, amount, tokensPurchased, time);
 				} catch (error) {
 					console.error("ERROR - Failed to fetch block timestamp:", error);
@@ -871,7 +864,6 @@ function getCurrentPrice() {
 		currentPrice = Math.ceil(startingPrice - priceDecay);
 	}
 
-	console.log("HOVNOS")
 	console.log("LOG - current time:", currentTime);
 	console.log("LOG - start time:", startTime);
 	console.log("LOG - duration:", duration);
@@ -880,16 +872,15 @@ function getCurrentPrice() {
 	return currentPrice;
 }
 
-// Function to choose an account based on index
 async function chooseAccountByIndex(index) {
   try {
-    const accounts = await provider.listAccounts(); // Retrieves all available accounts
+    const accounts = await provider.listAccounts(); 
     if (index < 0 || index >= accounts.length) {
       throw new Error("Index out of bounds for available accounts");
     }
 
     const accountAddress = accounts[index];
-    selectedSigner = provider.getSigner(accountAddress); // Set the signer to the chosen account
+    selectedSigner = provider.getSigner(accountAddress); 
     console.log(`LOG - Account selected at index ${index}: ${accountAddress}`);
   } catch (error) {
     console.error("ERROR - Failed to select account:", error);
@@ -897,15 +888,16 @@ async function chooseAccountByIndex(index) {
 }
 
 async function updateAuctionDetails() {
-    auctionEnded = await contract.getAuctionEnded();
 
     if (auctionEnded) {
-        // Clear the update interval when auction ends
-        clearInterval(updateInterval); // Stop the interval
+		console.log("Clearing interval...");
+        clearInterval(updateInterval); 
+		console.log("Interval cleared....");
         document.getElementById('timeRemaining').innerText = "Auction Ended";
+		document.getElementById('tokensSold').innerText = "DONE";
 		contract.endAuction();
         console.log("LOG - Auction ended, updates stopped.");
-        return; // Exit the function to prevent further updates
+        return; 
     }
 
     console.log("LOG - Auction ended:", auctionEnded);
@@ -923,19 +915,14 @@ async function updateAuctionDetails() {
     document.getElementById('tokensSold').innerText = tokensSold.toString();
 
 	if (tokensSold >= totalTokens) {
-		contract.endAuction();
-		document.getElementById('timeRemaining').innerText = "Auction Ended";
-		document.getElementById('tokensSold').innerText = contract.tokensSold();
-		return; // Exit the function if auction is ended
+		auctionEnded = true;
 	}
 
     updateTimeRemaining(endAt);
 
-    // Store current price and timestamp
     priceHistory.push(ethers.utils.formatEther(currentPrice));
     timestampHistory.push(new Date().toLocaleTimeString());
 
-    // Save to localStorage
     localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
     localStorage.setItem('timestampHistory', JSON.stringify(timestampHistory));
 
@@ -948,10 +935,11 @@ async function updateAuctionDetails() {
 	const timeRemaining = endAt - currentTime;
   
 	if (timeRemaining <= 0) {
-		contract.endAuction();	
-	  	document.getElementById('timeRemaining').innerText = "Auction Ended";
+		auctionEnded = true;
+		console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa");
+		document.getElementById('timeRemaining').innerText = "Auction Ended";
 	  	document.getElementById('tokensSold').innerText = contract.tokensSold();
-	  	return; // Exit the function if auction is ended
+	  	return; 
 	}
   
 	const minutes = Math.floor(timeRemaining / 60);
@@ -960,14 +948,12 @@ async function updateAuctionDetails() {
 	console.log("LOG - time remaining updated");
   }
   
-  // Modify the interval to store it in a variable so it can be cleared
-  //let updateInterval;
 
 
 async function getIndexByAddress(address) {
   try {
-    const accounts = await provider.listAccounts(); // Retrieve all accounts from the provider
-    const index = accounts.findIndex(account => account.toLowerCase() === address.toLowerCase()); // Match by address
+    const accounts = await provider.listAccounts(); 
+    const index = accounts.findIndex(account => account.toLowerCase() === address.toLowerCase()); 
 
     if (index === -1) {
       throw new Error("Address not found among available accounts.");
@@ -985,13 +971,11 @@ async function getIndexByAddress(address) {
 async function placeBid() {
   console.log("LOG - placeBid function called");
   
-  // Get the bid amount from input
   const bidAmount = document.getElementById('bidAmount').value;
   const bidAccount = document.getElementById('bidAccount').value;
   
   console.log("LOG - bidAmount retrieved:", bidAmount);
   console.log("LOG - bidAccount retrieved:", bidAccount);
-  // Check if provider and signer are accessible
   if (!provider) {
     console.error("ERROR - Provider is not defined");
     return;
@@ -1006,14 +990,12 @@ async function placeBid() {
   }
 
   try {
-    // Attempt to call the `bid` function
     console.log("LOG - attempting to place bid via contract...");
 
     const contractWithSigner = contract.connect(selectedSigner);
 
     const tx = await contractWithSigner.bid({
       value: bidAmount,
-      //gasLimit: ethers.utils.hexlify(100000) // Set a manual gas limit
     });
       
     console.log("LOG - Transaction successful, tx:", tx);
@@ -1098,5 +1080,4 @@ window.addEventListener('load', () => {
     }
 
     initializeContract();
-    updateInterval = setInterval(updateAuctionDetails, 1000); // Update every second
 });
