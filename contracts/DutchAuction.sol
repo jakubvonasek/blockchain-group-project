@@ -24,8 +24,7 @@ contract DutchAuction is ReentrancyGuard {
     // Events
     event BidPlaced(address indexed bidder, uint256 amount, uint256 tokensPurchased);
     event AuctionEnded(uint256 totalTokensSold, uint256 clearingPrice);
-    event TokensBurnt();
-    event debug(uint256 amount);
+    event debugBurn(uint256 value);
 
     // Constructor
     constructor(
@@ -45,9 +44,29 @@ contract DutchAuction is ReentrancyGuard {
         endAt = startAt + duration;
         totalTokens = _totalTokens;
 
-        
+
     }
 
+    // Function to get starting price
+    function getStartingPrice() public view returns (uint256) {
+        return startingPrice;
+    }
+    // Function to get ending price
+    function getReservePrice() public view returns (uint256) {
+        return reservePrice;
+    }
+    // Function to get duration of auction
+    function getDuration() public view returns (uint256) {
+        return duration;
+    }
+    // Function to get auction details
+    function getEndAt() public view returns (uint256) {
+        return endAt;
+    }
+    // Function to get start time
+    function getStartTime() public view returns (uint256) {
+        return startAt;
+    }
     // Function to get current price
     function getCurrentPrice() public view returns (uint256) {
         uint256 currentTime = block.timestamp;
@@ -61,14 +80,14 @@ contract DutchAuction is ReentrancyGuard {
             currentPrice = startingPrice - priceDecay;
         }
 
-        
+
 
         return currentPrice;
     }
 
     // Function to place a bid
     function bid() public payable nonReentrant {
-        
+
         require(block.timestamp >= startAt && block.timestamp <= endAt, "Auction not active");
         require(!auctionEnded, "Auction has ended");
         uint256 price = getCurrentPrice();
@@ -82,7 +101,7 @@ contract DutchAuction is ReentrancyGuard {
         bool success = token.transfer(msg.sender, tokensToPurchase);
         require(success, "Token transfer failed");
 
-        
+
 
         emit BidPlaced(msg.sender, msg.value, tokensToPurchase);
 
@@ -101,6 +120,8 @@ contract DutchAuction is ReentrancyGuard {
         auctionEnded = true;
         uint256 price = getCurrentPrice();
 
+
+
         emit AuctionEnded(tokensSold, price);
         finalizeAuction();
     }
@@ -109,13 +130,9 @@ contract DutchAuction is ReentrancyGuard {
     function finalizeAuction() internal {
         // Transfer the Ether to the seller
         uint256 contractBalance = address(this).balance;
-        
-        emit debug(contractBalance);
         if (contractBalance > 0) {
             token.burn(contractBalance);
-            emit TokensBurnt();
-            // Console log token burn
-        } else {
+            emit debugBurn(contractBalance);
         }
     }
 }
