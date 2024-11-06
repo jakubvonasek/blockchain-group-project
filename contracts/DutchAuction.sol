@@ -123,11 +123,11 @@ contract DutchAuction is ReentrancyGuard {
     // Function to finalize the auction
     function finalizeAuction() internal {
         // Transfer the Ether to the seller
-        uint256 contractBalance = address(this).balance;
-        emit debugBurn(contractBalance);
-        if (contractBalance > 0) {
-            token.burn(contractBalance);
-            emit debugBurn(contractBalance);
+        uint256 tokensToBurn = totalTokens - tokensSold;
+        emit debugBurn(tokensToBurn);
+        if (tokensToBurn > 0) {
+            token.burn(tokensToBurn);
+            emit debugBurn(tokensToBurn);
         }
     }
 }
