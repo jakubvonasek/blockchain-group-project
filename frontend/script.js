@@ -1008,20 +1008,16 @@ async function placeBid() {
 function updateBidsList(bidder, amount, tokensPurchased, time) {
 	const bidsList = document.getElementById('bidsList');
   
-	// Create a new table row
 	const row = document.createElement('tr');
   
-	// Create and append the Account ID cell
 	const accountCell = document.createElement('td');
 	accountCell.textContent = bidder;
 	row.appendChild(accountCell);
   
-	// Create and append the Bid Amount cell
 	const amountCell = document.createElement('td');
 	amountCell.textContent = amount.toString();
 	row.appendChild(amountCell);
   
-	// Create and append the Tokens Purchased cell
 	const tokensCell = document.createElement('td');
 	tokensCell.textContent = tokensPurchased.toString();
 	row.appendChild(tokensCell);
