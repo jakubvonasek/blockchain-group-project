@@ -1,5 +1,5 @@
-const auctionAddress = '0x9d92063CF55D7ac46dbBc21F8AF4Dc8f3924363D'; 
-const coinAddress = '0x3C7d1d1178Fc49FEb889CCd420c329F38991c2F3';
+const auctionAddress = '0xeB1937f9aC9FAdF95e14f5961ECea3Da601F63f0'; 
+const coinAddress = '0x0CCe931D62F96b1AEB80EE76553a0498BE7C7c20';
 
 const auctionAbi = [
 	{
@@ -803,7 +803,7 @@ let priceHistory = [];
 let timestampHistory = [];
 let eventListenersInitialized = false;
 let auctionEnded = false;
-let endAuctionCalled = false; // Add a flag to ensure endAuction is called only once
+let endAuctionCalled = false;
 let updateInterval;
 
 
@@ -834,7 +834,7 @@ async function initializeContract() {
 				}
 			})();
 		});
-		eventListenersInitialized = true; // Mark listeners as initialized
+		eventListenersInitialized = true; 
 	}
 	
 	startTime = await contract.getStartTime();
@@ -842,7 +842,7 @@ async function initializeContract() {
 	reservePrice = parseInt((await contract.getReservePrice()).toString());
 	duration = parseFloat(await contract.getDuration());
 	await updateAuctionDetails();
-	updateInterval = setInterval(updateAuctionDetails, 2000); 
+	updateInterval = setInterval(updateAuctionDetails, 1000); 
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
 }
@@ -938,7 +938,6 @@ async function updateAuctionDetails() {
   
 	if (timeRemaining <= 0) {
 		auctionEnded = true;
-		console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa");
 		document.getElementById('timeRemaining').innerText = "Auction Ended";
 	  	document.getElementById('tokensSold').innerText = contract.tokensSold();
 	  	return; 
@@ -986,7 +985,7 @@ async function placeBid() {
   const index = await getIndexByAddress(bidAccount);
   if (index !== null) {
     console.log(`Account index is: ${index}`);
-    await chooseAccountByIndex(index); // Optionally select the account based on index
+    await chooseAccountByIndex(index); 
   } else {
     console.log('Unable to choose account');
   }
@@ -1027,12 +1026,10 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
 	tokensCell.textContent = tokensPurchased.toString();
 	row.appendChild(tokensCell);
   
-	// Create and append the Time cell
 	const timeCell = document.createElement('td');
 	timeCell.textContent = time;
 	row.appendChild(timeCell);
   
-	// Append the row to the table body
 	bidsList.appendChild(row);
   
 	console.log("LOG - bid list updated");
@@ -1043,11 +1040,10 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: timestampHistory, // Use timestampHistory for x-axis labels
+        labels: timestampHistory, 
         datasets: [{
           label: 'Price Over Time',
-          data: priceHistory.map(price => price * Math.pow(10, 18)), // Multiply each price by 10^16
-          borderColor: 'rgba(75, 192, 192, 1)',
+          data: priceHistory.map(price => price * Math.pow(10, 18)), 
           fill: false
         }]
       },
@@ -1055,7 +1051,7 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
         scales: {
           x: {
             title: { display: true, text: 'Time' },
-            ticks: { autoSkip: true, maxTicksLimit: 10 } // Adjust to limit the number of displayed timestamps
+            ticks: { autoSkip: true, maxTicksLimit: 10 }
           },
           y: { title: { display: true, text: 'Price (Wei)' } }
         }
@@ -1066,9 +1062,7 @@ function updateBidsList(bidder, amount, tokensPurchased, time) {
 
 document.getElementById('placeBid').addEventListener('click', placeBid);
 
-// This function sets the interval to update the auction details every second
 window.addEventListener('load', () => {
-    // Load saved data from localStorage
     const savedPriceHistory = localStorage.getItem('priceHistory');
     const savedTimestampHistory = localStorage.getItem('timestampHistory');
 
@@ -1076,7 +1070,6 @@ window.addEventListener('load', () => {
         priceHistory = JSON.parse(savedPriceHistory);
         timestampHistory = JSON.parse(savedTimestampHistory);
     } else {
-        // Initialize with empty arrays if no data is saved
         priceHistory = [];
         timestampHistory = [];
     }

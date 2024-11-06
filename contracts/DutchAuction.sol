@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-// Import necessary OpenZeppelin contracts
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./V4Coin.sol";
 
 
 contract DutchAuction is ReentrancyGuard {
-    // Variables
     V4Coin public token;
     address payable public seller;
     uint256 public startingPrice;
@@ -21,13 +19,11 @@ contract DutchAuction is ReentrancyGuard {
 
     mapping(address => uint256) public bids;
 
-    // Events
     event BidPlaced(address indexed bidder, uint256 amount, uint256 tokensPurchased);
     event AuctionEnded(uint256 totalTokensSold, uint256 clearingPrice);
     event debugBurn(uint256 value);
     event Debug(string message);
 
-    // Constructor
     constructor(
         address _tokenAddress,
         uint256 _startingPrice,
@@ -51,27 +47,21 @@ contract DutchAuction is ReentrancyGuard {
     function getAuctionEnded() public view returns (bool) {
         return auctionEnded;
     }
-    // Function to get starting price
     function getStartingPrice() public view returns (uint256) {
         return startingPrice;
     }
-    // Function to get ending price
     function getReservePrice() public view returns (uint256) {
         return reservePrice;
     }
-    // Function to get duration of auction
     function getDuration() public view returns (uint256) {
         return duration;
     }
-    // Function to get auction details
     function getEndAt() public view returns (uint256) {
         return endAt;
     }
-    // Function to get start time
     function getStartTime() public view returns (uint256) {
         return startAt;
     }
-    // Function to get current price
     function getCurrentPrice() public view returns (uint256) {
         uint256 currentTime = block.timestamp;
         uint256 currentPrice;
@@ -89,7 +79,6 @@ contract DutchAuction is ReentrancyGuard {
         return currentPrice;
     }
 
-    // Function to place a bid
     function bid() public payable nonReentrant {
 
         require(block.timestamp >= startAt && block.timestamp <= endAt, "Auction not active");
@@ -100,7 +89,6 @@ contract DutchAuction is ReentrancyGuard {
         bids[msg.sender] += msg.value;
         tokensSold += tokensToPurchase;
 
-        // Transfer tokens to bidder
         bool success = token.transfer(msg.sender, tokensToPurchase);
         require(success, "Token transfer failed");
 
@@ -108,21 +96,17 @@ contract DutchAuction is ReentrancyGuard {
 
         emit BidPlaced(msg.sender, msg.value, tokensToPurchase);
 
-        // End auction if all tokens sold
         if (tokensSold >= totalTokens) {
             emit AuctionEnded(tokensSold, price);
         }
     }
 
-    // Function to end the auction manually after duration
     function endAuction() public nonReentrant {
         emit debugBurn(1337);
         finalizeAuction();
     }
 
-    // Function to finalize the auction
     function finalizeAuction() internal {
-        // Transfer the Ether to the seller
         uint256 tokensToBurn = totalTokens - tokensSold;
         emit debugBurn(tokensToBurn);
         if (tokensToBurn > 0) {
