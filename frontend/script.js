@@ -1,5 +1,5 @@
-const auctionAddress = '0x8fCa4876a216F537e1e5303692978498909D7EaF'; 
-const coinAddress = '0x663Ba421bcd5F485c4C0C74808D126AF61850031';
+const auctionAddress = '0xfbb36399F9762575Ca1B85c6EE3dc984cB7c7945'; 
+const coinAddress = '0xF9A0218914f5Efd33559f2360BA5f010eD6d4305';
 
 const auctionAbi = [
 	{
@@ -842,7 +842,7 @@ async function initializeContract() {
 	reservePrice = parseInt((await contract.getReservePrice()).toString());
 	duration = parseFloat(await contract.getDuration());
 	await updateAuctionDetails();
-	updateInterval = setInterval(updateAuctionDetails, 10000); // Update every second
+	updateInterval = setInterval(updateAuctionDetails, 2000); 
 	coinContract.transfer(auctionAddress, 500);
 	console.log("LOG - contract initialized");
 }

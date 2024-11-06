@@ -108,9 +108,8 @@ contract DutchAuction is ReentrancyGuard {
         emit BidPlaced(msg.sender, msg.value, tokensToPurchase);
 
         // End auction if all tokens sold
-        if (tokensSold == totalTokens) {
+        if (tokensSold >= totalTokens) {
             emit AuctionEnded(tokensSold, price);
-            finalizeAuction();
         }
     }
 
