@@ -46,7 +46,10 @@ contract DutchAuction is ReentrancyGuard {
 
 
     }
-
+    
+    function getAuctionEnded() public view returns (bool) {
+        return auctionEnded;
+    }
     // Function to get starting price
     function getStartingPrice() public view returns (uint256) {
         return startingPrice;

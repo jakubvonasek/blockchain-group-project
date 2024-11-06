@@ -1,5 +1,5 @@
-const auctionAddress = '0x35d786D04e1Af616B2C0a3C9Cb43c6f22d6C841F'; // Replace with your contract address
-const coinAddress = '0xdC8131370a99B297C7c8cEe3f3AE7A308cFb553b';
+const auctionAddress = '0xab280f1888634ad530c2D0a860A129e4C349a065'; // Replace with your contract address
+const coinAddress = '0xC325bAd12cE218F97099B0a72cE030174229ED3b';
 
 const auctionAbi = [
 	{
@@ -160,6 +160,19 @@ const auctionAbi = [
 		"name": "endAuction",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAuctionEnded",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -810,7 +823,7 @@ initializeCoinContract();
 async function initializeContract() {
 	const signer = provider.getSigner();
 	contract = new ethers.Contract(auctionAddress, auctionAbi, signer);
-	auctionEnded = await contract.auctionEnded();
+	auctionEnded = await contract.getAuctionEnded();
 	
 	if (!eventListenersInitialized) {
 		// Initialize event listeners only once
@@ -884,7 +897,7 @@ async function chooseAccountByIndex(index) {
 }
 
 async function updateAuctionDetails() {
-    auctionEnded = await contract.auctionEnded();
+    auctionEnded = await contract.getAuctionEnded();
 
     if (auctionEnded) {
         // Clear the update interval when auction ends
@@ -909,6 +922,13 @@ async function updateAuctionDetails() {
     document.getElementById('totalTokens').innerText = totalTokens.toString();
     document.getElementById('tokensSold').innerText = tokensSold.toString();
 
+	if (tokensSold >= totalTokens) {
+		contract.endAuction();
+		document.getElementById('timeRemaining').innerText = "Auction Ended";
+		document.getElementById('tokensSold').innerText = contract.tokensSold();
+		return; // Exit the function if auction is ended
+	}
+
     updateTimeRemaining(endAt);
 
     // Store current price and timestamp
@@ -928,9 +948,10 @@ async function updateAuctionDetails() {
 	const timeRemaining = endAt - currentTime;
   
 	if (timeRemaining <= 0) {
-	  document.getElementById('timeRemaining').innerText = "Auction Ended";
-	  document.getElementById('tokensSold').innerText = contract.tokensSold();
-	  return; // Exit the function if auction is ended
+		contract.endAuction();	
+	  	document.getElementById('timeRemaining').innerText = "Auction Ended";
+	  	document.getElementById('tokensSold').innerText = contract.tokensSold();
+	  	return; // Exit the function if auction is ended
 	}
   
 	const minutes = Math.floor(timeRemaining / 60);
