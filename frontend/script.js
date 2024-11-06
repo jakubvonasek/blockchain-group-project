@@ -1,5 +1,5 @@
-const auctionAddress = '0x79ae7CB4cd329E23F88A255AE3069B63e726D042'; // Replace with your contract address
-const coinAddress = '0xD9490404faCa063084b44c0d632934aE57776b89'
+const auctionAddress = '0xB25FF5f68549429F11009600C9715Dd7D76c6979'; // Replace with your contract address
+const coinAddress = '0x14d19eAbE9f5D568374FAf4Bf70AcC3d89EE1022'
 
 const auctionAbi = [
 	{
@@ -876,7 +876,12 @@ async function updateAuctionDetails() {
     if (auctionEnded) {
         // Clear the update interval when auction ends
         clearInterval(updateInterval); // Stop the interval
+		document.getElementById('timeRemaining').innerText = "Auction Ended";
         document.getElementById('timeRemaining').innerText = "Auction Ended";
+
+		localStorage.removeItem('priceHistory');
+		localStorage.removeItem('timestampHistory');
+
         console.log("LOG - Auction ended, updates stopped.");
         return; // Exit the function to prevent further updates
     }
