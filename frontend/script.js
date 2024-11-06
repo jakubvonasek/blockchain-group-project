@@ -1,5 +1,5 @@
-const auctionAddress = '0x79ae7CB4cd329E23F88A255AE3069B63e726D042'; // Replace with your contract address
-const coinAddress = '0xD9490404faCa063084b44c0d632934aE57776b89'
+const auctionAddress = '0x24438b1E8fF43F55Fbe006c4AA083762D707Bb0F'; // Replace with your contract address
+const coinAddress = '0xB847389403CcF346658529701f337067A9ca9b13'
 
 const auctionAbi = [
 	{
@@ -75,6 +75,25 @@ const auctionAbi = [
 			}
 		],
 		"name": "BidPlaced",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [],
+		"name": "TokensBurnt",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "debug",
 		"type": "event"
 	},
 	{
@@ -872,23 +891,16 @@ async function chooseAccountByIndex(index) {
 
 async function updateAuctionDetails() {
     auctionEnded = await contract.auctionEnded();
-    const currentTime = Math.floor(Date.now() / 1000);
-    const endAt = await contract.endAt();
-	const tmp = contract.tokensSold();
 
-
-    // Stop updates if the auction has ended or the end time has passed
+	const currentTime = (Date.now() / 1000).toString();
+	let endAt
+	try {
+		endAt = await contract.endAt().toString();
+	} catch (error) {
+		console.error("ERROR - Failed to fetch block timestamp:", error);
+	}
     if (auctionEnded || currentTime >= endAt) {
-        try {
-            // Call the endAuction function from your smart contract if not already ended
-            if (!auctionEnded) {
-                await contract.endAuction();
-                console.log("LOG - endAuction called successfully due to timer expiration");
-            }
-        } catch (error) {
-            console.error("ERROR - Failed to call endAuction:", error);
-        }
-
+        // Clear the update interval when auction ends
         clearInterval(updateInterval); // Stop the interval
         document.getElementById('timeRemaining').innerText = "Auction Ended";
         console.log("LOG - Auction ended, updates stopped.");

@@ -11,7 +11,7 @@ module.exports = function (deployer) {
             // Deploy DutchAuction with parameters
             const startingPrice = 1000;
             const reservePrice = 100;
-            const auctionDuration = 200; // Duration in seconds
+            const auctionDuration = 120; // Duration in seconds
             const decrementAmount = 500;
 
             await deployer.deploy(
