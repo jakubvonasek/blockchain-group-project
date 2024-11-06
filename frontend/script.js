@@ -1,5 +1,5 @@
-const auctionAddress = '0xB25FF5f68549429F11009600C9715Dd7D76c6979'; // Replace with your contract address
-const coinAddress = '0x14d19eAbE9f5D568374FAf4Bf70AcC3d89EE1022'
+const auctionAddress = '0x24438b1E8fF43F55Fbe006c4AA083762D707Bb0F'; // Replace with your contract address
+const coinAddress = '0xB847389403CcF346658529701f337067A9ca9b13'
 
 const auctionAbi = [
 	{
@@ -75,6 +75,25 @@ const auctionAbi = [
 			}
 		],
 		"name": "BidPlaced",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [],
+		"name": "TokensBurnt",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "debug",
 		"type": "event"
 	},
 	{
@@ -873,7 +892,14 @@ async function chooseAccountByIndex(index) {
 async function updateAuctionDetails() {
     auctionEnded = await contract.auctionEnded();
 
-    if (auctionEnded) {
+	const currentTime = (Date.now() / 1000).toString();
+	let endAt
+	try {
+		endAt = await contract.endAt().toString();
+	} catch (error) {
+		console.error("ERROR - Failed to fetch block timestamp:", error);
+	}
+    if (auctionEnded || currentTime >= endAt) {
         // Clear the update interval when auction ends
         clearInterval(updateInterval); // Stop the interval
 		document.getElementById('timeRemaining').innerText = "Auction Ended";
@@ -891,7 +917,6 @@ async function updateAuctionDetails() {
     const currentPrice = getCurrentPrice();
     const totalTokens = await contract.totalTokens();
     const tokensSold = await contract.tokensSold();
-    const endAt = await contract.endAt();
 
     const coinDbg = await coinContract.balanceOf(auctionAddress);
     console.log("LOG - coin current price:", currentPrice.toString());

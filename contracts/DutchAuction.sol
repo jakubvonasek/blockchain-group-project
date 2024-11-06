@@ -24,6 +24,8 @@ contract DutchAuction is ReentrancyGuard {
     // Events
     event BidPlaced(address indexed bidder, uint256 amount, uint256 tokensPurchased);
     event AuctionEnded(uint256 totalTokensSold, uint256 clearingPrice);
+    event TokensBurnt();
+    event debug(uint256 amount);
 
     // Constructor
     constructor(
@@ -124,8 +126,6 @@ contract DutchAuction is ReentrancyGuard {
         auctionEnded = true;
         uint256 price = getCurrentPrice();
 
-        
-
         emit AuctionEnded(tokensSold, price);
         finalizeAuction();
     }
@@ -134,15 +134,11 @@ contract DutchAuction is ReentrancyGuard {
     function finalizeAuction() internal {
         // Transfer the Ether to the seller
         uint256 contractBalance = address(this).balance;
-        seller.transfer(contractBalance);
-
-        // Console log transfer details
-
-        // Burn unsold tokens
-        uint256 unsoldTokens = totalTokens - tokensSold;
-        if (unsoldTokens > 0) {
-            token.burn(unsoldTokens);
-
+        
+        emit debug(contractBalance);
+        if (contractBalance > 0) {
+            token.burn(contractBalance);
+            emit TokensBurnt();
             // Console log token burn
         } else {
         }
