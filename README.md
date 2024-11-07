@@ -1,7 +1,7 @@
 # Dutch Auction
 
 ## Quick overview of program functionalities:
-The program implements the Dutch Auction of our self deployed token V4Coin. The mechanism of the Dutch Auction was modified in a way, that the amount of tokens you get depends only on the time you bid. The later you buy, the more you get, but it is not guaranteed that the tokens will still be avaliable later during the auction. This allows people to strategize when buying the token. After placing a successfull bid, the bidder immediately gets the amount of the tokens bought.
+The program implements the Dutch Auction of our self deployed token V4Coin. The mechanism of the Dutch Auction, after an agreement with the professor, was modified in a way, that the amount of tokens you get depends only on the time you bid. The later you buy, the more you get, but it is not guaranteed that the tokens will still be avaliable later during the auction. This allows people to strategize when buying the token. After placing a successfull bid, the bidder immediately gets the amount of the tokens bought.
 
 ### How to run Auction:
 1. Run Ganache
